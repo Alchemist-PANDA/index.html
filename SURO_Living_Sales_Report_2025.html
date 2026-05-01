@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SURO Living — 2025 Sales Performance Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #1a1a2e;
+            --card-bg: #ffffff;
+            --primary: #0f3460;
+            --secondary: #e94560;
+            --accent: #f5a623;
+            --border: #e1e4e8;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 15px;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 300;
+            transition: color 0.3s;
+        }
+        .sidebar ul li a:hover {
+            color: var(--secondary);
+        }
+
+        /* Main Content */
+        .content {
+            margin-left: 250px;
+            padding: 40px;
+            width: calc(100% - 250px);
+            box-sizing: border-box;
+        }
+        .header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            color: var(--primary);
+        }
+        .date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 60px;
+        }
+        h2.section-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary);
+            padding-left: 15px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary);
+        }
+        .kpi-title {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        /* Charts Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .chart-full {
+            grid-column: span 2;
+        }
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f4f8;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Heatmap Specific */
+        .heatmap-cell {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Recommendation Cards */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .rec-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--accent);
+        }
+        .rec-headline {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .rec-data {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        .rec-action {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>SURO Living</h2>
+        <ul>
+            <li><a href="#summary">1. Executive Summary</a></li>
+            <li><a href="#revenue">2. Revenue Analysis</a></li>
+            <li><a href="#product">3. Product Performance</a></li>
+            <li><a href="#geographic">4. Geographic Analysis</a></li>
+            <li><a href="#customer">5. Customer Analysis</a></li>
+            <li><a href="#discount">6. Discount Analysis</a></li>
+            <li><a href="#seasonal">7. Seasonal & Time Analysis</a></li>
+            <li><a href="#operational">8. Operational Insights</a></li>
+            <li><a href="#recommendations">9. Recommendations</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="header">
+            <h1>SURO Living — 2025 Sales Performance Report</h1>
+            <div class="date">Generated on: <span id="currentDate"></span></div>
+            <script>document.getElementById('currentDate').innerText = new Date().toLocaleDateString();</script>
+        </div>
+
+        <!-- 1. EXECUTIVE SUMMARY -->
+        <section id="summary">
+            <h2 class="section-title">1. Executive Summary</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-title">Total Revenue</div><div class="kpi-value">PKR 20,771,585</div></div>
+                <div class="kpi-card"><div class="kpi-title">Total Orders</div><div class="kpi-value">2,000</div></div>
+                <div class="kpi-card"><div class="kpi-title">Avg Order Value</div><div class="kpi-value">PKR 10,386</div></div>
+                <div class="kpi-card"><div class="kpi-title">Total Units Sold</div><div class="kpi-value">5,052</div></div>
+                <div class="kpi-card"><div class="kpi-title">Avg Discount</div><div class="kpi-value">9.9%</div></div>
+                <div class="kpi-card"><div class="kpi-title">Top City</div><div class="kpi-value">Karachi</div></div>
+                <div class="kpi-card"><div class="kpi-title">Top Product</div><div class="kpi-value">Heels</div></div>
+                <div class="kpi-card"><div class="kpi-title">Best Month</div><div class="kpi-value">Apr</div></div>
+            </div>
+        </section>
+
+        <!-- 2. REVENUE ANALYSIS -->
+        <section id="revenue">
+            <h2 class="section-title">2. Revenue Analysis</h2>
+            <div class="chart-grid">
+                <div class="chart-container chart-full">
+                    <div class="chart-title">Monthly Revenue Trend</div>
+                    <canvas id="monthlyRevenueChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Monthly Order Volume</div>
+                    <canvas id="monthlyOrderChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Revenue by Category</div>
+                    <canvas id="categoryRevenueChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PRODUCT PERFORMANCE -->
+        <section id="product">
+            <h2 class="section-title">3. Product Performance</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Revenue by Product</div>
+                    <canvas id="productRevenueChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Units Sold by Product</div>
+                    <canvas id="productUnitsChart"></canvas>
+                </div>
+                <div class="chart-container chart-full">
+                    <div class="chart-title">Average Price per Unit by Product</div>
+                    <canvas id="productPriceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">Product-Category Revenue Breakdown</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Total Orders</th>
+                        <th>Total Units</th>
+                        <th>Avg Price (PKR)</th>
+                        <th>Total Revenue (PKR)</th>
+                        <th>Revenue Share (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Heels</td><td>Shoes</td><td>280</td><td>691</td><td>4,617</td><td>2,872,286</td><td>13.8%</td></tr><tr><td>Hoodie</td><td>Clothing</td><td>257</td><td>663</td><td>4,560</td><td>2,718,922</td><td>13.1%</td></tr><tr><td>Jacket</td><td>Clothing</td><td>245</td><td>620</td><td>4,487</td><td>2,516,119</td><td>12.1%</td></tr><tr><td>Jeans</td><td>Clothing</td><td>254</td><td>643</td><td>4,665</td><td>2,741,265</td><td>13.2%</td></tr><tr><td>Kurta</td><td>Clothing</td><td>259</td><td>656</td><td>4,514</td><td>2,602,688</td><td>12.5%</td></tr><tr><td>Sandals</td><td>Shoes</td><td>249</td><td>639</td><td>4,604</td><td>2,617,095</td><td>12.6%</td></tr><tr><td>Sneakers</td><td>Shoes</td><td>224</td><td>570</td><td>4,610</td><td>2,399,992</td><td>11.6%</td></tr><tr><td>T-Shirt</td><td>Clothing</td><td>232</td><td>570</td><td>4,528</td><td>2,303,219</td><td>11.1%</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 4. GEOGRAPHIC ANALYSIS -->
+        <section id="geographic">
+            <h2 class="section-title">4. Geographic Analysis</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Revenue by City</div>
+                    <canvas id="cityRevenueChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Orders by City</div>
+                    <canvas id="cityOrdersChart"></canvas>
+                </div>
+                <div class="chart-container chart-full">
+                    <div class="chart-title">Average Order Value by City</div>
+                    <canvas id="cityAovChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">City × Product Revenue Heatmap</div>
+            <table id="cityProductHeatmap">
+                <!-- Heatmap generated by JS -->
+            </table>
+        </section>
+
+        <!-- 5. CUSTOMER ANALYSIS -->
+        <section id="customer">
+            <h2 class="section-title">5. Customer Analysis</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Top 10 Customers by Revenue</div>
+                    <canvas id="topCustomersChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Order Frequency Distribution</div>
+                    <canvas id="customerFreqChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">Customer × City Distribution</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Unique Customers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Faisalabad</td><td>10</td></tr><tr><td>Islamabad</td><td>10</td></tr><tr><td>Karachi</td><td>10</td></tr><tr><td>Lahore</td><td>10</td></tr><tr><td>Multan</td><td>10</td></tr><tr><td>Peshawar</td><td>10</td></tr><tr><td>Rawalpindi</td><td>10</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 6. DISCOUNT ANALYSIS -->
+        <section id="discount">
+            <h2 class="section-title">6. Discount Analysis</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Revenue & Orders by Discount Tier</div>
+                    <canvas id="discountTierChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Average Discount per Product</div>
+                    <canvas id="productDiscountChart"></canvas>
+                </div>
+                <div class="chart-container chart-full">
+                    <div class="chart-title">Discount vs Final Amount (Scatter)</div>
+                    <canvas id="discountScatterChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">Discount Impact Table</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Discount Tier (%)</th>
+                        <th>Total Orders</th>
+                        <th>Original Amount (PKR)</th>
+                        <th>Final Amount (PKR)</th>
+                        <th>Revenue Lost (PKR)</th>
+                        <th>Avg Order Value (PKR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>0%</td><td>385.0</td><td>4,640,266</td><td>4,640,266</td><td style='color:red;'>0</td><td>12,053</td></tr><tr><td>5%</td><td>408.0</td><td>4,710,793</td><td>4,475,253</td><td style='color:red;'>235,540</td><td>10,969</td></tr><tr><td>10%</td><td>419.0</td><td>4,700,685</td><td>4,230,616</td><td style='color:red;'>470,068</td><td>10,097</td></tr><tr><td>15%</td><td>420.0</td><td>4,898,766</td><td>4,163,951</td><td style='color:red;'>734,815</td><td>9,914</td></tr><tr><td>20%</td><td>368.0</td><td>4,076,873</td><td>3,261,498</td><td style='color:red;'>815,375</td><td>8,863</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 7. SEASONAL & TIME ANALYSIS -->
+        <section id="seasonal">
+            <h2 class="section-title">7. Seasonal & Time Analysis</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Quarterly Performance</div>
+                    <canvas id="quarterlyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Day-of-Week Order Patterns</div>
+                    <canvas id="dowChart"></canvas>
+                </div>
+                <div class="chart-container chart-full">
+                    <div class="chart-title">Monthly Revenue by Category</div>
+                    <canvas id="monthlyCategoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">Month × City Revenue Heatmap</div>
+            <table id="monthCityHeatmap">
+                <!-- Generated by JS -->
+            </table>
+        </section>
+
+        <!-- 8. OPERATIONAL INSIGHTS -->
+        <section id="operational">
+            <h2 class="section-title">8. Operational Insights</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Quantity Distribution</div>
+                    <canvas id="quantityDistChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Price Range Distribution</div>
+                    <canvas id="priceDistChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-title" style="text-align:left; margin-top:20px;">High-Value Orders (Top 20)</div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>City</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Final Amount (PKR)</th>
+                            <th>Discount (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>5592</td><td>Usman</td><td>Islamabad</td><td>Heels</td><td>4</td><td>31,840</td><td>0%</td></tr><tr><td>6739</td><td>Fatima</td><td>Peshawar</td><td>Heels</td><td>4</td><td>31,744</td><td>0%</td></tr><tr><td>5505</td><td>Usman</td><td>Multan</td><td>Hoodie</td><td>4</td><td>31,740</td><td>0%</td></tr><tr><td>6815</td><td>Ali</td><td>Islamabad</td><td>Hoodie</td><td>4</td><td>31,380</td><td>0%</td></tr><tr><td>6351</td><td>Ahmed</td><td>Karachi</td><td>Sneakers</td><td>4</td><td>31,332</td><td>0%</td></tr><tr><td>5065</td><td>Usman</td><td>Peshawar</td><td>Sandals</td><td>4</td><td>31,104</td><td>0%</td></tr><tr><td>5664</td><td>Bilal</td><td>Multan</td><td>Heels</td><td>4</td><td>30,960</td><td>0%</td></tr><tr><td>6102</td><td>Noor</td><td>Karachi</td><td>Jeans</td><td>4</td><td>30,588</td><td>0%</td></tr><tr><td>5543</td><td>Fatima</td><td>Peshawar</td><td>Jeans</td><td>4</td><td>30,464</td><td>0%</td></tr><tr><td>5059</td><td>Fatima</td><td>Lahore</td><td>Kurta</td><td>4</td><td>30,275</td><td>5%</td></tr><tr><td>5019</td><td>Ahmed</td><td>Peshawar</td><td>Jeans</td><td>4</td><td>30,225</td><td>5%</td></tr><tr><td>5941</td><td>Fatima</td><td>Faisalabad</td><td>Jeans</td><td>4</td><td>30,104</td><td>0%</td></tr><tr><td>5240</td><td>Ayesha</td><td>Lahore</td><td>Jeans</td><td>4</td><td>30,081</td><td>5%</td></tr><tr><td>5455</td><td>Sara</td><td>Lahore</td><td>Heels</td><td>4</td><td>29,872</td><td>5%</td></tr><tr><td>6987</td><td>Noor</td><td>Rawalpindi</td><td>Sandals</td><td>4</td><td>29,849</td><td>5%</td></tr><tr><td>5224</td><td>Zara</td><td>Rawalpindi</td><td>Hoodie</td><td>4</td><td>29,840</td><td>0%</td></tr><tr><td>6022</td><td>Ahmed</td><td>Lahore</td><td>T-Shirt</td><td>4</td><td>29,760</td><td>0%</td></tr><tr><td>6081</td><td>Usman</td><td>Peshawar</td><td>Hoodie</td><td>4</td><td>29,724</td><td>5%</td></tr><tr><td>6313</td><td>Sara</td><td>Islamabad</td><td>Jeans</td><td>4</td><td>29,560</td><td>0%</td></tr><tr><td>6641</td><td>Zara</td><td>Islamabad</td><td>Kurta</td><td>4</td><td>29,454</td><td>5%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 9. STRATEGIC RECOMMENDATIONS -->
+        <section id="recommendations">
+            <h2 class="section-title">9. Strategic Recommendations</h2>
+            <div class="rec-grid">
+                <div class='rec-card'><div class='rec-headline'>Focus Marketing on Top Cities</div><div class='rec-data'>Data point: Karachi is the top performing city generating 16.0% of revenue.</div><div class='rec-action'>Action: Allocate a larger portion of the digital marketing budget to Karachi to capture more market share.</div></div><div class='rec-card'><div class='rec-headline'>Optimize Pricing for Top Products</div><div class='rec-data'>Data point: Heels generated the highest revenue, indicating strong demand.</div><div class='rec-action'>Action: Consider slight premium pricing or bundling strategies for Heels to maximize margins.</div></div><div class='rec-card'><div class='rec-headline'>Review Discount Strategies</div><div class='rec-data'>Data point: The average discount given is 9.9%.</div><div class='rec-action'>Action: Analyze if high discounts are truly driving incremental sales or just eroding margins, and adjust discounting caps.</div></div><div class='rec-card'><div class='rec-headline'>Leverage Peak Seasonality</div><div class='rec-data'>Data point: Month Apr showed the highest revenue.</div><div class='rec-action'>Action: Prepare inventory and marketing campaigns well in advance of Apr to capitalize on seasonal demand.</div></div><div class='rec-card'><div class='rec-headline'>Promote Cross-Selling</div><div class='rec-data'>Data point: Average order quantity is 2.5 units per order.</div><div class='rec-action'>Action: Implement 'frequently bought together' recommendations on the website to increase units per order.</div></div><div class='rec-card'><div class='rec-headline'>Target High-Value Customers</div><div class='rec-data'>Data point: The top customer spent PKR 2,424,554.</div><div class='rec-action'>Action: Create a VIP loyalty program offering exclusive early access to new collections for top spenders.</div></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Chart.js Scripts & Data Injection -->
+    <script>
+        // Data Payloads
+        const monthlyRev = {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "values": [1578875.75, 1709396.5, 1697803.5, 1907893.3, 1667809.25, 1811491.8, 1741261.7, 1557476.55, 1821396.8, 1761521.7, 1864522.35, 1652136.15]};
+        const monthlyOrd = {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "values": [160, 158, 152, 171, 168, 160, 162, 158, 185, 173, 187, 166], "colors": ["#e94560", "#e94560", "#e94560", "#0f3460", "#0f3460", "#e94560", "#e94560", "#e94560", "#0f3460", "#0f3460", "#0f3460", "#e94560"]};
+        const catRev = {"labels": ["Clothing", "Shoes"], "values": [12882212.05, 7889373.3]};
+        const prodRev = {"labels": ["Heels", "Jeans", "Hoodie", "Sandals", "Kurta", "Jacket", "Sneakers", "T-Shirt"], "values": [2872285.8, 2741265.15, 2718922.05, 2617095.1, 2602687.6, 2516118.55, 2399992.4, 2303218.7], "avg": 2596448.16875};
+        const prodUnits = {"labels": ["Heels", "Hoodie", "Jacket", "Jeans", "Kurta", "Sandals", "Sneakers", "T-Shirt"], "values": [691, 663, 620, 643, 656, 639, 570, 570]};
+        const prodPrice = {"labels": ["Heels", "Hoodie", "Jacket", "Jeans", "Kurta", "Sandals", "Sneakers", "T-Shirt"], "values": [4617.182142857143, 4559.583657587548, 4487.012244897959, 4664.578740157481, 4514.19305019305, 4604.449799196787, 4609.59375, 4528.353448275862]};
+        const cityRev = {"labels": ["Karachi", "Peshawar", "Multan", "Faisalabad", "Lahore", "Rawalpindi", "Islamabad"], "values": [3326835.7, 3290790.5, 2912104.9, 2876922.15, 2848076.25, 2777466.15, 2739389.7]};
+        const cityOrd = {"labels": ["Faisalabad", "Islamabad", "Karachi", "Lahore", "Multan", "Peshawar", "Rawalpindi"], "values": [280, 262, 322, 276, 273, 302, 285]};
+        const cityAov = {"labels": ["Faisalabad", "Islamabad", "Karachi", "Lahore", "Multan", "Peshawar", "Rawalpindi"], "values": [10274.721964285714, 10455.685877862594, 10331.787888198758, 10319.116847826086, 10667.050915750915, 10896.657284768213, 9745.495263157894]};
+        const topCust = {"labels": ["Usman", "Ahmed", "Bilal", "Fatima", "Noor", "Sara", "Zara", "Ali", "Hassan", "Ayesha"], "values": [2424554.35, 2203791.95, 2132509.3, 2102459.0, 2046857.2, 2039748.65, 1999375.35, 1971132.9, 1956177.85, 1894978.8]};
+        const custFreq = {"labels": ["182", "188", "190", "194", "195", "196", "201", "207", "222", "225"], "values": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]};
+        const discTier = {"labels": ["0%", "5%", "10%", "15%", "20%"], "orders": [385, 408, 419, 420, 368], "revenue": [4640266.0, 4475253.35, 4230616.5, 4163951.1, 3261498.4]};
+        const scatterData = [{"Discount_%": 0, "Final_Amount": 12132.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13520.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1052.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11781.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8610.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2182.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6953.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5568.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22389.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14065.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6203.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14348.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 26798.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7866.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10086.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 19280.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13201.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9021.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12233.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 30225.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21424.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9155.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14855.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6214.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3469.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1761.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 14244.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4048.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12462.7, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4326.3, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5454.45, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12933.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8520.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14417.7, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2669.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4537.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4069.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4842.15, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8634.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14169.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2899.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8364.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18783.3, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14814.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4280.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 13724.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19213.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3420.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 18503.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7611.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1202.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4866.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9654.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7538.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4617.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13689.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 16767.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 16621.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14496.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 30274.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 14150.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22644.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5664.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 14995.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5147.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 31104.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21426.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21267.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 7473.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18154.5, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14312.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13315.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7920.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11267.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6222.85, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 21616.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5627.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11159.1, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 13350.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3383.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5142.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11344.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7076.55, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19405.5, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 16122.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1960.95, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2844.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13173.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15808.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11815.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2148.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2895.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4012.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 25961.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13195.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5263.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15407.1, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6343.55, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5699.25, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7563.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4215.15, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9210.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10823.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18268.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2537.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11808.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16731.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15684.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12177.1, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11779.3, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5491.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 10656.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5312.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 16822.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17072.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3602.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9844.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 7484.25, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6458.3, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5047.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17977.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5899.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6966.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13338.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1687.25, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 14846.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6373.55, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3510.25, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2293.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12274.95, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5942.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3937.75, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6492.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12982.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5173.95, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12650.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20651.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8610.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13968.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 23832.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 23536.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20200.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 15094.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5307.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12742.35, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16094.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13243.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7024.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 7683.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 9956.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 15470.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18201.9, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9270.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13494.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15472.65, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8680.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16860.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 26684.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 15648.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7731.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13456.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10321.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2810.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 15331.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15156.3, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10436.3, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1719.55, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4551.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 26656.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11174.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 7851.45, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3883.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4010.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 28940.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6556.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5407.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1905.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12116.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9156.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8113.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9892.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1680.55, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2101.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14382.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 7849.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13796.85, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18457.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8556.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12264.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21128.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14208.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4225.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 11067.5, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10833.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11566.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10049.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3381.3, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2239.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 20393.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5820.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4490.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10855.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6308.95, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4672.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6068.15, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 23018.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11826.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 21464.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2118.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7344.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4863.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3165.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17750.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4259.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2589.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13868.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14679.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5473.9, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 22470.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4313.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15279.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5859.05, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 22051.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8415.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 29840.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12058.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7929.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2925.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13979.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9486.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 16823.55, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19528.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11595.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9244.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 23415.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5542.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6724.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6164.1, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 17180.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3441.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 30080.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20187.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13170.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1928.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2326.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7620.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6285.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19319.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14234.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 21462.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8775.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4206.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 21561.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6044.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7719.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3173.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12931.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3923.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6794.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2008.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13545.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19801.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 11312.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1999.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1941.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6057.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5312.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8641.1, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 3368.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 18887.85, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9716.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6674.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2444.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5024.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 22348.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 15749.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13104.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14687.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10616.25, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2143.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12940.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18380.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7964.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 21663.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12655.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 3924.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15794.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3696.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10312.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1308.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4510.95, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5235.15, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 26020.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7441.35, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4471.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12457.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5348.5, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 29024.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5965.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8382.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2116.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11498.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 18747.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6645.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3828.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5400.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 16785.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11209.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10581.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9930.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4979.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 16343.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5971.25, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12974.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 20589.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3564.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3014.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10846.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6577.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2837.7, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2977.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15146.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6642.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18374.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17190.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22720.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 17773.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5518.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2691.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4923.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10723.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11640.75, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4269.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14544.9, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9831.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5032.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20236.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 22582.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22963.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 26924.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 21463.35, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6071.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1478.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4115.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6932.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10032.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12519.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6928.35, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5610.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3384.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5030.25, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2599.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1704.3, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4053.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8404.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5196.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4850.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10959.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5960.7, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 28996.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3654.15, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13719.9, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9488.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6957.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5671.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 22197.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 8150.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1951.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13762.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2244.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5028.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4140.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13137.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9068.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 15162.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 17790.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14390.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7508.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 19704.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1876.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17518.95, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6163.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 27324.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2342.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9266.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1588.65, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8942.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10728.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10546.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 20740.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 19076.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 17799.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6527.45, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 20004.3, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1624.35, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5972.95, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 21046.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3222.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4039.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1459.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8227.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21892.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11472.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5897.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6610.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16149.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4272.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12628.35, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6044.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11544.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1953.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3552.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6114.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6147.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9684.9, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4532.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8499.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13476.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4431.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9080.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20968.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3740.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3177.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3441.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 9504.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22472.25, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1998.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8702.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17787.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13341.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5992.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7219.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20910.45, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12934.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13538.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6939.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 11937.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5802.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8056.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3132.25, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 27135.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5880.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8496.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6203.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7380.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5152.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20640.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9595.65, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1774.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8369.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4203.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7775.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9208.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5992.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9993.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 29871.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2517.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4568.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12866.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5244.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3864.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12985.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2172.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5831.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5457.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 19194.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10332.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 20468.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6274.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2896.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10812.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5775.75, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15036.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13134.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20522.85, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7104.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14478.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10533.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10985.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12954.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21244.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7676.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5324.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13362.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12605.5, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 15244.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 27296.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 21078.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 15401.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5827.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9394.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3519.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13497.15, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2791.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 21001.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5845.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7799.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13222.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 21304.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6339.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9330.45, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 25330.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12676.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6755.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8834.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 31740.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15474.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19525.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3385.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18209.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2778.65, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5446.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8707.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6123.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2811.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2945.25, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2652.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8537.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 26341.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4014.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4625.1, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4981.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4492.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18622.65, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 9276.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12992.25, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9632.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 16986.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4761.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5768.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 21241.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6094.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6999.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3924.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8880.3, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5533.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 19292.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5084.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21168.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7201.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16870.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5479.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5852.25, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 30464.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8356.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3040.95, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5988.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 21144.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3454.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11858.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 17796.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2236.3, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 21644.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2915.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 13606.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 15952.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4574.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5658.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9865.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12533.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3216.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 18775.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11975.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17784.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6916.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 27057.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12794.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 11625.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3328.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3053.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3706.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6577.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4279.5, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 24108.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5502.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4561.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9498.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6561.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 20960.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3672.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4083.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19345.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11570.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11586.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 24357.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2070.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4796.55, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4970.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4284.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17078.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1370.85, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3025.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 31840.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6122.55, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1253.05, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3897.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4228.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7550.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5210.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3415.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1958.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 26132.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13829.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3335.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18928.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10203.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 27998.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1635.3, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12240.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 23894.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3508.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 22760.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3316.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7864.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3651.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7482.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10756.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 17124.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 24182.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 11590.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16529.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 21314.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3080.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 23709.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1129.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6100.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 25228.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6856.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16205.25, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10576.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3724.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11223.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13651.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10184.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5421.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15302.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6612.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7270.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6528.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9928.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11888.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6080.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5896.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14238.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14313.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14090.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9616.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 19338.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4567.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3990.75, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12646.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18852.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10223.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3442.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2813.9, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9487.7, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9427.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2308.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2161.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6168.45, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2348.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6050.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3556.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6819.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 30960.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4122.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10818.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10408.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7935.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 15988.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3372.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7192.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3572.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8316.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1534.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14893.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7451.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13672.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2919.75, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6367.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3904.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13672.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 17577.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14322.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5498.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10812.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11743.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9270.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4937.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18475.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5076.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4276.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 12158.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3365.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12685.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2053.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 15573.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14004.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7369.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3094.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2999.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5482.5, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7778.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8339.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4347.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13323.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 14955.75, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6643.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 16147.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 7905.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4457.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17012.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 10902.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10592.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 13502.25, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16391.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3261.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1896.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22085.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5592.15, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17130.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15170.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2958.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4096.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7168.5, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 12924.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20860.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3910.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4641.7, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7020.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18372.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10966.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8256.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 19149.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7418.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7721.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15746.25, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4034.95, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5572.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22749.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5582.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4236.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5378.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5259.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6245.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7894.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 25855.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14520.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11134.95, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 16255.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2798.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4237.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10404.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 25344.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 15820.35, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3014.95, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 16429.65, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13288.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11289.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6270.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11163.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11466.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6179.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6231.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3638.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6970.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11260.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 19953.75, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7722.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6654.65, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 26956.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 27628.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 19098.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21542.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8859.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6648.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12532.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 22147.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3439.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4750.65, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 26657.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 24519.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2954.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1703.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2559.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 23889.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3033.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2222.75, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11595.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6146.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 18713.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5945.75, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 19186.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3999.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 13430.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 25772.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2204.05, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 26596.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 26208.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 28608.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5983.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18961.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 19092.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 24440.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5763.85, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15047.55, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13816.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 17475.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6641.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 28956.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13962.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5028.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11955.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12667.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4803.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6371.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20067.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7852.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5676.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9960.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5015.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 22080.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 7370.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5662.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10779.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14515.05, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7174.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13632.3, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12695.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8399.7, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9469.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9015.5, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 24662.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2931.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8156.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 20003.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1824.95, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5797.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6292.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2963.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1071.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16121.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18662.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2872.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 22692.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 17556.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6350.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 27211.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6968.7, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 13806.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 13593.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2829.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9363.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2354.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21384.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14739.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2284.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4467.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1596.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13953.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4600.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11112.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8609.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 21540.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2512.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20665.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 21491.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6372.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1966.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 9013.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5088.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2074.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8821.3, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12131.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5793.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2430.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 29191.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5407.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8384.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8144.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3330.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 1197.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12996.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5340.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3312.65, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6424.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1527.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9334.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 7209.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12207.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3791.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7106.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7261.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 26840.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6435.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15631.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8096.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5553.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5742.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4408.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3828.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6765.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12015.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 25139.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18636.15, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12423.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2757.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3637.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6358.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9797.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7182.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 21234.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10373.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17457.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13742.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2234.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 29252.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10518.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13311.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13518.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3655.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 15085.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10920.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8183.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1811.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3532.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 11639.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6830.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20894.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11959.5, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5961.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4586.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2992.85, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 10175.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6330.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5108.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5408.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7756.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4693.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6288.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 28440.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 30104.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8135.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15000.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 14064.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 11205.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 25868.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5885.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21372.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13903.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3452.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3953.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7952.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10668.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 14425.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14658.5, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 7149.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4026.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 19672.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4828.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6483.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8817.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6764.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6046.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11678.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5337.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5259.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4967.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14848.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11605.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9310.05, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3857.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 22635.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5045.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2193.55, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7336.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8180.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 24570.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 24601.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1436.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5077.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 12744.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6455.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10999.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5397.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 7507.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3494.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5221.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2972.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13241.1, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10886.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1974.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6620.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10889.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9280.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12256.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 23370.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12614.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5136.65, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13287.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9008.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11186.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9319.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4904.85, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8464.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8062.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4102.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13524.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 17852.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1948.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13020.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11820.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3163.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13335.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 24821.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3131.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 23718.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 21318.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6854.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5793.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13055.85, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2556.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 29760.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12777.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10186.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18228.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9193.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3389.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13135.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 24119.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 27756.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2748.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5339.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5696.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 22263.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11614.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9942.45, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 26460.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4683.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1514.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1256.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6200.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4497.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7842.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2719.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16936.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 23529.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1384.65, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2495.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12031.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10898.7, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21244.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 15459.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16567.35, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 13617.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4891.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 19791.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18365.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 27332.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12813.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1354.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13596.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8527.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 20233.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 945.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8474.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8202.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 13251.5, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 22966.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13986.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8390.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 17914.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3424.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13903.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8992.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11628.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 15039.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9804.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 17311.95, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4308.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 9077.25, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 29723.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18870.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2649.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7826.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11135.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3082.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6614.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5474.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14724.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4712.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5308.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6498.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5003.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9741.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2718.9, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9435.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 26455.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 23152.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 20043.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5015.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6447.65, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 30588.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8355.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4718.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5750.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1892.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3304.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 14092.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11768.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 23373.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15820.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12816.45, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6243.25, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14130.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7502.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1809.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2955.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2888.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 25993.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11905.1, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4686.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 15534.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5770.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 22606.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10508.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13460.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15056.55, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 17240.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 23351.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2147.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2734.45, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3285.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13910.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14302.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4550.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8504.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5107.5, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3359.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6116.1, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 15699.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4735.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7519.95, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17391.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 20949.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5217.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21556.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12644.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12357.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 19017.9, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4947.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9325.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 16059.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9039.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12220.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4022.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9384.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6043.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6439.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1526.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14916.9, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 26020.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5458.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 16746.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11813.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13471.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8620.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 16438.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4388.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13118.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11839.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5617.65, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18120.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2984.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8841.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2568.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1061.15, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20216.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10715.1, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3678.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14546.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3055.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 13609.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1520.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9613.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5462.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13662.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 10689.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9667.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14483.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7410.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 20284.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12788.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10317.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 23382.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 12568.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 11698.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 1973.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13640.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5934.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 20694.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10248.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5180.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7265.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3238.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5033.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1274.9, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22531.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4105.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21168.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1829.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10199.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14848.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22817.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11079.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4931.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14364.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 26910.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8782.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7480.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14340.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6543.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 24449.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3372.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19158.15, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8978.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11785.5, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3516.9, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5603.1, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9662.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1649.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 1951.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16190.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 23462.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 11700.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8102.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 16803.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1497.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5353.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 17138.55, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 17123.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7698.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5397.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14063.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5603.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14920.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2227.75, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7329.25, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15890.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3817.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9809.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18260.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8132.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 21594.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1132.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14426.1, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5558.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 19475.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4104.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18780.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2109.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 24684.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 18183.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 23576.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 16029.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8840.85, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6537.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21891.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 26392.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 22580.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3259.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2362.65, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2644.35, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5167.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18873.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7472.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5263.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8559.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1712.85, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3596.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3670.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2301.85, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5144.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 9848.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4288.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12770.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9210.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20480.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5149.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7513.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7770.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2717.1, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3474.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 19475.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14853.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 14436.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4036.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5846.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1130.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 27500.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10692.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7380.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4487.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11578.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4929.55, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7936.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5455.85, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14925.15, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8852.1, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5096.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6136.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 18210.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2689.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 29560.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4630.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8613.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1710.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 22198.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6267.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9783.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12456.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12888.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7820.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1075.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6529.35, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5299.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9206.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6956.1, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11612.7, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8769.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20617.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8211.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5833.95, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 24840.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2111.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21792.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6183.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5681.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8791.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12099.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5653.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 20820.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5380.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3359.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6651.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6227.1, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6914.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20642.55, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4240.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10483.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6284.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 31332.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8561.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6989.15, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1092.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 15784.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 27060.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8772.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3725.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8149.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15461.25, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9535.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10710.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2214.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4388.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6678.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14983.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 14583.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16023.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4713.25, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10883.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5860.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7282.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1150.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6750.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11645.85, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3814.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4554.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3363.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9611.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20832.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 890.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4617.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2845.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 3619.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21828.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11858.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7053.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 28576.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5121.9, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2852.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3014.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6199.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 15817.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 24521.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11858.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14314.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 17866.65, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 18518.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10147.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 7504.65, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 12288.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 1415.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6112.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6526.5, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10881.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 940.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 17250.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22389.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2424.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7618.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 21397.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13127.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11589.75, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12082.1, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 7436.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2766.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18254.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 14904.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3717.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4761.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18563.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4185.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 16041.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 10670.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1628.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 19947.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12148.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6260.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9621.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10735.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3729.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 16541.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1351.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3051.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 21670.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13824.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3351.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6534.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4955.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3607.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 25177.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 1136.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 12579.9, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8622.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9306.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 14351.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16353.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 21895.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3626.15, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8182.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 27268.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6612.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5100.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18170.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5682.9, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6942.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 23045.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8911.95, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4738.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1761.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5180.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2544.05, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12319.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5819.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4681.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1838.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6472.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 11012.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 17701.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7470.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10830.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11390.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8450.25, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2493.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11500.5, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6624.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19800.75, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9534.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 22686.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 16934.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2749.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16492.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5629.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1113.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20298.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4773.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 18562.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5238.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10258.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3545.1, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 18098.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 20889.6, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7506.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 14590.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 8837.1, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5156.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14623.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3705.95, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12672.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3990.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 20364.3, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8764.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7686.9, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6698.45, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3368.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3004.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4256.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5275.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1733.15, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10727.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5749.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 8654.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21618.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 8273.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3839.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21220.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7354.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12945.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4930.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4746.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2884.05, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7460.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 9954.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3735.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1915.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18270.9, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 29120.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1036.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3422.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10788.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 15724.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 18584.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 2390.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4468.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12080.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9868.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 25376.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7302.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11140.1, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14221.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11245.5, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10916.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10159.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8564.25, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3271.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11728.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6375.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9274.35, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4785.15, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9602.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2997.9, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3555.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3952.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 13959.3, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 25336.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9904.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1988.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12027.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5292.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7984.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8989.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 18303.3, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5715.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3814.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7038.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3897.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7310.85, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3577.65, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 23230.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 9069.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 9652.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13203.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16936.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 26669.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 21844.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 4872.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 8016.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 1242.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 8792.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5294.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1876.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1355.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17909.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 29328.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6998.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18300.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 6259.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6026.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6083.1, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8527.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18615.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13651.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3369.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5045.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14102.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6184.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 10795.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6885.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 12148.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4764.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13799.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12161.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6294.7, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6938.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2303.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6954.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 12736.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3110.15, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11344.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2580.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 5497.65, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3122.05, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 8629.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 24403.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20617.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 16250.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6427.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4402.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6567.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 14280.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7404.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 26885.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4143.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15434.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7303.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6288.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7522.1, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2679.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13406.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 19148.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6003.05, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 18133.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 18173.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5446.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 16647.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7854.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1740.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9662.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6976.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4749.3, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 29453.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8291.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 22792.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 10713.15, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6486.35, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18469.65, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3425.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6396.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17024.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6403.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 13662.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 14723.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6742.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10408.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4735.75, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 19413.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5741.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2964.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7395.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3596.7, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2976.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2638.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4837.5, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 8546.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13754.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3366.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5066.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5724.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9072.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12365.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 20325.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2600.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4308.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 17452.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 19198.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11335.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4629.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 11088.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 7344.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 15554.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19191.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5206.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10867.5, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3776.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1895.25, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 9692.55, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 11349.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12501.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10504.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4454.55, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8394.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4648.65, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 10848.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5720.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10104.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 17888.25, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5708.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 10173.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 19251.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6724.1, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13245.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 15818.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 2964.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 21873.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6465.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 20996.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3784.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6343.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9324.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6199.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 5316.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4358.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5092.35, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3933.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3724.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1547.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5004.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 24220.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 4346.25, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 1700.1, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6284.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2959.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17020.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2422.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 25408.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3113.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 12387.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2901.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 14157.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 10812.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 5215.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2238.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11431.8, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 28368.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11360.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4847.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6399.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16360.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 31744.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 10404.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5986.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8719.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5618.3, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3737.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2878.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 10976.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 1891.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20867.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9487.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9861.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 17496.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6904.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5003.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 6104.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3637.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4807.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 12172.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9603.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3610.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 17462.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 26478.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 22508.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 1900.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4582.35, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6275.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 1035.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15951.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5046.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4437.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 10808.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2924.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 17438.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 24688.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7915.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4777.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4740.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 21049.2, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2473.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 6996.75, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17738.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 21739.8, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6797.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11671.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9213.15, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2804.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4773.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11715.3, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21141.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5137.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 4406.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 15634.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12262.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4329.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 26506.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 12377.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2285.65, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 23925.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5322.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 9254.4, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 12498.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4166.7, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7386.25, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 10064.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5747.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4746.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1318.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 10513.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 7378.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2728.5, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 1898.1, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5306.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9157.05, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4840.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9834.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 31380.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5455.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3409.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 22824.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3978.85, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 6820.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 14223.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9570.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13014.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 16339.05, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19897.65, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 2525.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3487.5, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14560.65, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5474.7, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13721.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 7994.25, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11223.3, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 20919.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 4246.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17270.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3854.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13490.4, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 11906.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 20508.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 4736.7, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 7828.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4793.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 11474.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 16768.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14249.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 24253.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 18741.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3903.55, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12535.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 2697.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 12364.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13348.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11473.2, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 12895.35, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11923.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 7136.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 12770.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 14170.35, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 23814.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5534.7, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 7676.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19907.25, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5468.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20268.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 12513.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 20784.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9113.7, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5421.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 5062.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 8490.15, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 9633.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 3625.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 12834.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 6669.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3830.1, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1030.75, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 23300.2, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 8691.2, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 5216.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 13974.4, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 2048.5, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 6356.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 9177.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6474.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 3240.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10339.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5602.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19767.6, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3903.2, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 3695.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6717.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6599.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 9126.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9312.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 11062.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 5992.5, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1700.5, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 12700.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 2374.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5846.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13687.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 15951.6, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 14011.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 4525.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 1922.8, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6356.3, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 22093.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4251.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 26020.0, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 14470.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 8230.4, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 13914.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 3388.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 3431.4, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 28512.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 16512.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2621.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2535.55, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 15507.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 18745.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 7833.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19482.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13497.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2863.3, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8853.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2938.35, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6825.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 5899.5, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5479.1, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 17138.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17109.6, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 20772.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6251.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 10173.6, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6546.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 5176.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 19160.55, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5807.2, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2259.3, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1459.2, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 21519.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 4416.8, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 2624.85, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 23582.8, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 19440.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 4681.8, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 11485.8, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 5974.65, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 11608.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 2367.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 13107.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 1592.9, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 5916.6, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 25472.0, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 7444.8, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7948.65, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 3903.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 15446.7, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 4199.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 1900.0, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 8714.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 9828.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 14403.9, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 1932.0, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 18122.85, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 12248.0, "Category": "Clothing"}, {"Discount_%": 0, "Final_Amount": 4676.0, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 22164.0, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 9784.0, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3069.9, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 19321.35, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 6940.8, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 15702.4, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 2458.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 8188.05, "Category": "Shoes"}, {"Discount_%": 15, "Final_Amount": 11828.6, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 17016.4, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13440.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 3166.2, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 3767.7, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 2784.6, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 16350.6, "Category": "Shoes"}, {"Discount_%": 0, "Final_Amount": 16674.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 11230.9, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1971.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 26406.2, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 29849.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 7324.5, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 3955.05, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 9251.4, "Category": "Clothing"}, {"Discount_%": 5, "Final_Amount": 13091.0, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 6563.2, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 13397.4, "Category": "Shoes"}, {"Discount_%": 20, "Final_Amount": 17464.8, "Category": "Clothing"}, {"Discount_%": 10, "Final_Amount": 21801.6, "Category": "Shoes"}, {"Discount_%": 10, "Final_Amount": 6026.4, "Category": "Clothing"}, {"Discount_%": 20, "Final_Amount": 1900.0, "Category": "Shoes"}, {"Discount_%": 5, "Final_Amount": 12371.85, "Category": "Clothing"}, {"Discount_%": 15, "Final_Amount": 6361.4, "Category": "Shoes"}];
+        const prodDisc = {"labels": ["Heels", "Hoodie", "Jacket", "Jeans", "Kurta", "Sandals", "Sneakers", "T-Shirt"], "values": [10.285714285714286, 9.961089494163424, 9.244897959183673, 10.059055118110237, 10.250965250965251, 9.879518072289157, 9.732142857142858, 10.064655172413794]};
+        const qtrPerf = {"labels": ["Q1", "Q2", "Q3", "Q4"], "revenue": [4986075.75, 5387194.35, 5120135.05, 5278180.2], "orders": [470, 499, 505, 526]};
+        const dowPerf = {"labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "values": [287, 267, 291, 286, 242, 299, 328]};
+        const monCat = {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "clothing": [1012436.3, 1155654.45, 924391.8, 1116213.2, 1064491.65, 949533.95, 1145640.95, 875188.0, 1050486.95, 1247166.8, 1162510.05, 1178497.95], "shoes": [566439.45, 553742.05, 773411.7, 791680.1, 603317.6, 861957.85, 595620.75, 682288.55, 770909.85, 514354.9, 702012.3, 473638.2]};
+        const qtyDist = {"labels": ["1", "2", "3", "4"], "values": [504, 460, 516, 520]};
+        const priceDist = {"labels": ["0-3K", "3K-6K", "6K-10K", "10K-15K", "15K-20K", "20K+"], "values": [222, 466, 442, 407, 221, 242]};
+
+        // Color palettes
+        const colors = ['#0f3460', '#e94560', '#f5a623', '#16213e', '#533483', '#00bbf0', '#f9f871', '#ff5722'];
+
+        // Common Chart Options
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#666';
+
+        // 2a. Monthly Revenue
+        new Chart(document.getElementById('monthlyRevenueChart'), {
+            type: 'line',
+            data: {
+                labels: monthlyRev.labels,
+                datasets: [{
+                    label: 'Total Revenue (PKR)',
+                    data: monthlyRev.values,
+                    borderColor: '#0f3460',
+                    backgroundColor: 'rgba(15, 52, 96, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 2b. Monthly Order Volume
+        new Chart(document.getElementById('monthlyOrderChart'), {
+            type: 'bar',
+            data: {
+                labels: monthlyOrd.labels,
+                datasets: [{
+                    label: 'Orders',
+                    data: monthlyOrd.values,
+                    backgroundColor: monthlyOrd.colors
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 2c. Revenue by Category
+        new Chart(document.getElementById('categoryRevenueChart'), {
+            type: 'doughnut',
+            data: {
+                labels: catRev.labels,
+                datasets: [{
+                    data: catRev.values,
+                    backgroundColor: ['#0f3460', '#e94560']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 3a. Revenue by Product
+        new Chart(document.getElementById('productRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: prodRev.labels,
+                datasets: [{
+                    label: 'Revenue (PKR)',
+                    data: prodRev.values,
+                    backgroundColor: '#16213e'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: prodRev.avg,
+                                xMax: prodRev.avg,
+                                borderColor: '#f5a623',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: { content: 'Avg', enabled: true, position: 'end' }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3b. Units Sold by Product
+        new Chart(document.getElementById('productUnitsChart'), {
+            type: 'bar',
+            data: {
+                labels: prodUnits.labels,
+                datasets: [{
+                    label: 'Units Sold',
+                    data: prodUnits.values,
+                    backgroundColor: '#0f3460'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3c. Average Price by Product
+        new Chart(document.getElementById('productPriceChart'), {
+            type: 'bar',
+            data: {
+                labels: prodPrice.labels,
+                datasets: [{
+                    label: 'Average Price (PKR)',
+                    data: prodPrice.values,
+                    backgroundColor: '#533483'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 4a. Revenue by City
+        new Chart(document.getElementById('cityRevenueChart'), {
+            type: 'bar',
+            data: {
+                labels: cityRev.labels,
+                datasets: [{
+                    label: 'Revenue (PKR)',
+                    data: cityRev.values,
+                    backgroundColor: cityRev.values.map(v => `rgba(15, 52, 96, ${0.3 + 0.7*(v/Math.max(...cityRev.values))})`)
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 4b. Orders by City
+        new Chart(document.getElementById('cityOrdersChart'), {
+            type: 'doughnut',
+            data: {
+                labels: cityOrd.labels,
+                datasets: [{
+                    data: cityOrd.values,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+
+        // 4d. AOV by City
+        new Chart(document.getElementById('cityAovChart'), {
+            type: 'bar',
+            data: {
+                labels: cityAov.labels,
+                datasets: [{
+                    label: 'AOV (PKR)',
+                    data: cityAov.values,
+                    backgroundColor: '#e94560'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 5a. Top 10 Customers
+        new Chart(document.getElementById('topCustomersChart'), {
+            type: 'bar',
+            data: {
+                labels: topCust.labels,
+                datasets: [{
+                    label: 'Total Spend (PKR)',
+                    data: topCust.values,
+                    backgroundColor: '#16213e'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 5b. Customer Freq
+        new Chart(document.getElementById('customerFreqChart'), {
+            type: 'bar',
+            data: {
+                labels: custFreq.labels,
+                datasets: [{
+                    label: 'Number of Customers',
+                    data: custFreq.values,
+                    backgroundColor: '#00bbf0'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { x: { title: { display: true, text: 'Orders Placed' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 6a. Discount Tier
+        new Chart(document.getElementById('discountTierChart'), {
+            type: 'bar',
+            data: {
+                labels: discTier.labels,
+                datasets: [
+                    {
+                        label: 'Revenue (PKR)',
+                        data: discTier.revenue,
+                        backgroundColor: '#0f3460',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders',
+                        data: discTier.orders,
+                        type: 'line',
+                        borderColor: '#e94560',
+                        borderWidth: 3,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { type: 'linear', position: 'left' },
+                    y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+
+        // 6b. Discount Scatter
+        const scatterPoints = scatterData.map(d => ({
+            x: d['Discount_%'],
+            y: d['Final_Amount'],
+            cat: d['Category']
+        }));
+        new Chart(document.getElementById('discountScatterChart'), {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Clothing',
+                        data: scatterPoints.filter(d => d.cat === 'Clothing'),
+                        backgroundColor: 'rgba(15, 52, 96, 0.5)'
+                    },
+                    {
+                        label: 'Shoes',
+                        data: scatterPoints.filter(d => d.cat === 'Shoes'),
+                        backgroundColor: 'rgba(233, 69, 96, 0.5)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Discount %' } },
+                    y: { title: { display: true, text: 'Final Amount (PKR)' } }
+                }
+            }
+        });
+
+        // 6d. Product Discount
+        new Chart(document.getElementById('productDiscountChart'), {
+            type: 'bar',
+            data: {
+                labels: prodDisc.labels,
+                datasets: [{
+                    label: 'Average Discount %',
+                    data: prodDisc.values,
+                    backgroundColor: '#f5a623'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 7a. Quarterly Performance
+        new Chart(document.getElementById('quarterlyChart'), {
+            type: 'bar',
+            data: {
+                labels: qtrPerf.labels,
+                datasets: [
+                    {
+                        label: 'Revenue (PKR)',
+                        data: qtrPerf.revenue,
+                        backgroundColor: '#0f3460',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders',
+                        data: qtrPerf.orders,
+                        backgroundColor: '#e94560',
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { type: 'linear', position: 'left' },
+                    y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+
+        // 7b. Day of Week
+        new Chart(document.getElementById('dowChart'), {
+            type: 'bar',
+            data: {
+                labels: dowPerf.labels,
+                datasets: [{
+                    label: 'Orders',
+                    data: dowPerf.values,
+                    backgroundColor: '#16213e'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 7c. Monthly Category Stacked
+        new Chart(document.getElementById('monthlyCategoryChart'), {
+            type: 'bar',
+            data: {
+                labels: monCat.labels,
+                datasets: [
+                    {
+                        label: 'Clothing',
+                        data: monCat.clothing,
+                        backgroundColor: '#0f3460'
+                    },
+                    {
+                        label: 'Shoes',
+                        data: monCat.shoes,
+                        backgroundColor: '#e94560'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+
+        // 8a. Quantity Dist
+        new Chart(document.getElementById('quantityDistChart'), {
+            type: 'bar',
+            data: {
+                labels: qtyDist.labels,
+                datasets: [{
+                    label: 'Order Count',
+                    data: qtyDist.values,
+                    backgroundColor: '#533483'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 8b. Price Dist
+        new Chart(document.getElementById('priceDistChart'), {
+            type: 'bar',
+            data: {
+                labels: priceDist.labels,
+                datasets: [{
+                    label: 'Order Count',
+                    data: priceDist.values,
+                    backgroundColor: '#00bbf0'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Generate Heatmaps Helper
+        function getColor(val, maxVal) {
+            if(val === 0) return '#ffffff';
+            const intensity = val / maxVal;
+            // green gradient: from white to deep green
+            const r = Math.round(255 * (1 - intensity));
+            const g = Math.round(255 * (1 - intensity*0.5));
+            const b = Math.round(255 * (1 - intensity));
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // City x Product Heatmap
+        const cityProdHeatmapData = {"cities": ["Faisalabad", "Islamabad", "Karachi", "Lahore", "Multan", "Peshawar", "Rawalpindi"], "products": ["Heels", "Hoodie", "Jacket", "Jeans", "Kurta", "Sandals", "Sneakers", "T-Shirt"], "values": [[384224.6, 291101.7, 336781.85, 350087.1, 403630.55, 318400.05, 308572.75, 484123.55], [460735.1, 437405.55, 245097.7, 391556.9, 318713.0, 329371.8, 364329.3, 192180.35], [463100.8, 300700.15, 534148.55, 502810.95, 332881.45, 488276.1, 269037.55, 435880.15], [330594.9, 434697.75, 344650.35, 367406.8, 372934.45, 390602.35, 290008.7, 317180.95], [348786.5, 419449.7, 322877.5, 464006.75, 324985.5, 280960.0, 447739.8, 303299.15], [505519.7, 525053.8, 382245.7, 354710.35, 442514.0, 364240.75, 385185.85, 331320.35], [379324.2, 310513.39999999997, 350316.9, 310686.3, 407028.65, 445244.05, 335118.45, 239234.19999999998]]};
+        const cpMax = Math.max(...cityProdHeatmapData.values.flat());
+        let cpTable = '<thead><tr><th>City</th>' + cityProdHeatmapData.products.map(p => `<th>${p}</th>`).join('') + '</tr></thead><tbody>';
+        cityProdHeatmapData.cities.forEach((city, i) => {
+            cpTable += `<tr><td><strong>${city}</strong></td>`;
+            cityProdHeatmapData.values[i].forEach(val => {
+                cpTable += `<td class="heatmap-cell" style="background-color: ${getColor(val, cpMax)}">${val > 0 ? val.toLocaleString() : '-'}</td>`;
+            });
+            cpTable += '</tr>';
+        });
+        cpTable += '</tbody>';
+        document.getElementById('cityProductHeatmap').innerHTML = cpTable;
+
+        // Month x City Heatmap
+        const monCityHeatmapData = {"months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "cities": ["Faisalabad", "Islamabad", "Karachi", "Lahore", "Multan", "Peshawar", "Rawalpindi"], "values": [[227415.95, 268078.95, 338939.95, 175808.9, 187562.8, 204771.55, 176297.65], [192896.6, 232017.5, 304095.0, 210295.65, 161716.35, 356746.1, 251629.3], [263755.5, 286529.35, 230956.7, 161496.35, 217242.35, 326269.4, 211553.85], [292471.2, 164316.35, 272623.65, 281992.55, 206467.85, 312524.45, 377497.25], [260797.3, 61948.7, 227073.8, 209284.65, 394577.0, 256064.65, 258063.15000000002], [204027.0, 274276.3, 273030.1, 208855.25, 298723.95, 259956.6, 292622.6], [186949.55, 258982.05000000002, 384763.35, 287381.6, 252233.6, 193304.7, 177646.85], [238650.95, 355969.5, 214703.45, 211659.94999999998, 158382.1, 261901.9, 116208.7], [291308.7, 262528.0, 273216.7, 233291.25, 337767.2, 200995.45, 222289.5], [224846.1, 205648.85, 265423.05, 310947.25, 237990.75, 312651.2, 204014.5], [242953.55, 169738.15, 312949.05, 291098.1, 277966.3, 342657.5, 227159.7], [250849.75, 199356.0, 229060.9, 265964.75, 181474.65, 262947.0, 262483.1]]};
+        const mcMax = Math.max(...monCityHeatmapData.values.flat());
+        let mcTable = '<thead><tr><th>Month</th>' + monCityHeatmapData.cities.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+        monCityHeatmapData.months.forEach((mon, i) => {
+            mcTable += `<tr><td><strong>${mon}</strong></td>`;
+            monCityHeatmapData.values[i].forEach(val => {
+                mcTable += `<td class="heatmap-cell" style="background-color: ${getColor(val, mcMax)}">${val > 0 ? val.toLocaleString() : '-'}</td>`;
+            });
+            mcTable += '</tr>';
+        });
+        mcTable += '</tbody>';
+        document.getElementById('monthCityHeatmap').innerHTML = mcTable;
+
+    </script>
+</body>
+</html>
